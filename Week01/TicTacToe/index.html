@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+      .board {
+        display: flex;
+        width: 300px;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .cell {
+        width: 100px;
+        height: 100px;
+        box-sizing: border-box;
+        border: 2px solid #ffffff;
+        background-color: green;
+        line-height: 100px;
+        text-align: center;
+        font-size: 50px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="board"></div>
+    <script>
+
+      class TicTacToe {
+        constructor() {
+          this.partten = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+          ]
+          //当前的player
+          this.currentPlayer = 1
+          this.playerObj = {
+            2: '⭕️',
+            1: '❌'
+          }
+        }
+        //创建棋盘
+        createBoard() {
+          const len = this.partten.length
+          let board = document.querySelector('.board')
+          //创建之前清空棋盘
+          board.innerHTML = ''
+          for (let i = 0; i < len; i++) {
+            for (let j = 0; j < this.partten[i].length; j++) {
+              let cell = document.createElement('div')
+              cell.classList.add('cell')
+              const status = this.playerObj[this.partten[i][j]] || ''
+              cell.innerText = status
+              //棋盘为空才添加事件
+              !status && cell.addEventListener('click', () => this.userMove(i, j), false)
+              board.appendChild(cell)
+            }
+          }
+        }
+
+        userMove(i, j) {
+          //判断是否将要赢了
+          this.partten[i][j] = this.currentPlayer
+          //判断是否赢了
+          if (this.isWin(this.partten, this.currentPlayer, i, j)) {
+            alert(this.playerObj[this.currentPlayer] + ' will win')
+            // this.clearBoard()
+          }
+          this.createBoard()
+          this.currentPlayer = 3 - this.currentPlayer
+          this.computerMove()
+
+        }
+        computerMove() {
+          let obj = this.bestChioce(this.partten, this.currentPlayer)
+          if (obj.point) {
+            this.partten[obj.point[0]][obj.point[1]] = this.currentPlayer
+            if (this.isWin(this.partten, this.currentPlayer, obj.point[0], obj.point[1])) {
+              alert(this.playerObj[this.currentPlayer] + ' will win')
+              // this.clearBoard()
+            }
+          }
+
+          this.createBoard()
+          this.currentPlayer = 3 - this.currentPlayer
+        }
+        //拷贝棋盘
+        copyPartten(val) {
+          return JSON.parse(JSON.stringify(val))
+        }
+        //最优的策略 1 赢， 0， 和， -1 
+        bestChioce(partten, player) {
+          let result = -2, point = null
+          outer: for (let i = 0; i < partten.length; i++) {
+            for (let j = 0; j < partten[i].length; j++) {
+              //如果已经有棋子了，
+              if (partten[i][j]) {
+                continue
+              }
+              //克隆棋盘放入棋子
+              let copy = this.copyPartten(partten)
+              copy[i][j] = player
+              if (this.isWin(copy, player, i, j)) {
+                return {
+                  point: [i, j],
+                  result: 1
+                }
+              }
+              //找出对方的位置
+              let p = this.bestChioce(copy, 3 - player).result
+              //对方结果的负值就是我方结果。
+              if (-p > result) {
+                result = -p;
+                point = [i, j]
+              }
+              //剪支不能保证赢的更多
+              if (result === 1) {
+                // return { point, result }
+                break outer
+              }
+            }
+          }
+          return {
+            point,
+            result: point ? result : 0
+          }
+        }
+
+        //判断水平方向是否赢了
+        horizontalWin(partten, player, v, h) {
+          let len = partten.length
+          for (let j = 0; j < len; j++) {
+            if (partten[v][j] !== player) {
+              return false
+            }
+          }
+          return true
+        }
+        //竖直方向是否赢了
+        verticalWin(partten, player, v, h) {
+          let len = partten.length
+          for (let i = 0; i < len; i++) {
+            if (partten[i][h] !== player) {
+              return false
+            }
+          }
+          return true
+        }
+        //斜线方向是否赢了
+        slashWin(partten, player, v, h) {
+          let len = partten.length
+          let win = true
+          if (v === h) {
+            for (let i = 0; i < len; i++) {
+              if (partten[i][i] !== player) {
+                win = false
+                break
+              }
+            }
+            if (win) {
+              return true
+            }
+          }
+          if (v === 2 - h) {
+            let col = len - 1
+            for (let i = 0; i < len; i++) {
+              if (partten[i][col--] !== player) {
+                return false
+              }
+            }
+            return true
+          }
+          return false
+        }
+        //是否赢了
+        isWin(partten, player, i, j) {
+          return this.horizontalWin(partten, player, i, j) || this.verticalWin(partten, player, i, j) || this.slashWin(partten, player, i, j)
+        }
+        init() {
+          this.createBoard()
+        }
+        //清空棋盘
+        clearBoard() {
+          this.partten = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+          ]
+          this.createBoard()
+        }
+      }
+
+      let game = new TicTacToe()
+      game.init()
+
+    </script>
+  </body>
+
+</html>

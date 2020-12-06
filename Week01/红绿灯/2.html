@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+      .light {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        margin: 0 40px;
+        border-radius: 50%;
+        background-color: #cccccc;
+      }
+
+      .red {
+        background-color: red;
+      }
+
+      .yellow {
+        background-color: yellow;
+      }
+
+      .green {
+        background-color: green;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrapper">
+      <div class="light red-light"></div>
+      <div class="light yellow-light"></div>
+      <div class="light green-light"></div>
+    </div>
+    <script>
+      let obj = {
+        0: 'red',
+        1: 'yellow',
+        2: 'green'
+      }
+      function changeColor(color) {
+        //清除所有的颜色
+        let list = document.querySelectorAll('.light')
+        for (let i = 0; i < list.length; i++) {
+          list[i].classList.remove(obj[i])
+        }
+        //增加颜色
+        let light = document.querySelector(`.${color}-light`)
+        light.classList.add(color)
+      }
+      function sleep(time) {
+        return new Promise(resolve => {
+          setTimeout(() => resolve(), time)
+        })
+      }
+      function run() {
+        changeColor('red')
+        sleep(3000).then(() => {
+          changeColor('yellow')
+          return sleep(1000)
+        }).then(() => {
+          changeColor('green')
+          return sleep(2000)
+        }).then(run)
+      }
+      run()
+    </script>
+
+  </body>
+
+</html>
