@@ -1,190 +1,238 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        .container {
-            display: flex;
-            flex-wrap: wrap;
-            width:1000px;
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Document</title>
+        <style>
+            .container {
+                display: flex;
+                flex-wrap: wrap;
+                width: 1000px;
 
-        }
-
-        .cell {
-            width: 20px;
-            height: 20px;
-            box-sizing: border-box;
-            border: 1px solid #ffffff;
-            background-color: #cccccc;
-            font-size: 12px;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container"></div>
-    <button class="btn">保存</button>
-    <script>
-        let isPress = false
-        let clear = false
-        document.addEventListener('mousedown', (e) => {
-            isPress = true
-            clear = e.which === 3
-        })
-        document.addEventListener('mouseup', () => {
-            isPress = false
-        })
-        document.addEventListener('contextmenu', e => {
-            e.preventDefault()
-        })
-        const container = document.querySelector('.container')
-        let mapStr = window.localStorage.getItem('map')
-        let mapArr = mapStr ? JSON.parse(mapStr): Array(2500).fill(0)
-        for (let i = 0; i < 50; i++) {
-            for (let j = 0; j < 50; j++) {
-                let cell = document.createElement('div')
-                cell.classList.add('cell')
-                if (mapArr[50 * i + j] === 1) {
-                    cell.style.backgroundColor = '#000000'
-                }
-                cell.addEventListener('mousemove', (e) => {
-                    if (isPress) {
-                        if (clear) {
-                            e.target.style.backgroundColor = '#cccccc'
-                            mapArr[50 * i + j] = 0
-                        } else {
-                            e.target.style.backgroundColor = '#000000'
-                            mapArr[50 * i + j] = 1
-                        }
-                    }
-                }, false)
-                container.append(cell)
             }
-        }
 
-        document.querySelector('.btn').addEventListener('click', () => {
-            window.localStorage.setItem('map', JSON.stringify(mapArr))
-        })
+            .cell {
+                width: 20px;
+                height: 20px;
+                box-sizing: border-box;
+                border: 1px solid #ffffff;
+                background-color: #cccccc;
+                font-size: 12px;
+            }
+        </style>
+    </head>
 
-        function sleep(t) {
-            return new Promise(resolve => {
-                setTimeout(resolve, t)
+    <body>
+        <div class="container"></div>
+        <button class="btn">保存</button>
+        <script>
+            let isPress = false
+            let clear = false
+            document.addEventListener('mousedown', (e) => {
+                isPress = true
+                clear = e.which === 3
             })
-        }
-
-
-        class Sorter {
-            constructor(arr, compare) {
-                this.arr = arr;
-                this.compare = compare || function(a, b) { return a - b }
-            }
-            getData() {
-                //取出最小的
-                if(this.size()) {
-                    let minValue = this.arr[0], minIndex = 0
-                    for(let i = 1; i < this.arr.length; i++) {
-                        if(this.compare(this.arr[i], minValue) < 0) {
-                            minValue = this.arr[i]
-                            minIndex = i;
+            document.addEventListener('mouseup', () => {
+                isPress = false
+            })
+            document.addEventListener('contextmenu', e => {
+                e.preventDefault()
+            })
+            const container = document.querySelector('.container')
+            let mapStr = window.localStorage.getItem('map')
+            let mapArr = mapStr ? JSON.parse(mapStr) : Array(2500).fill(0)
+            for (let i = 0; i < 50; i++) {
+                for (let j = 0; j < 50; j++) {
+                    let cell = document.createElement('div')
+                    cell.classList.add('cell')
+                    if (mapArr[50 * i + j] === 1) {
+                        cell.style.backgroundColor = '#000000'
+                    }
+                    cell.addEventListener('mousemove', (e) => {
+                        if (isPress) {
+                            if (clear) {
+                                e.target.style.backgroundColor = '#cccccc'
+                                mapArr[50 * i + j] = 0
+                            } else {
+                                e.target.style.backgroundColor = '#000000'
+                                mapArr[50 * i + j] = 1
+                            }
                         }
+                    }, false)
+                    container.append(cell)
+                }
+            }
+
+            document.querySelector('.btn').addEventListener('click', () => {
+                window.localStorage.setItem('map', JSON.stringify(mapArr))
+            })
+
+            function sleep(t) {
+                return new Promise(resolve => {
+                    setTimeout(resolve, t)
+                })
+            }
+
+
+            // class Sorter {
+            //     constructor(arr, compare) {
+            //         this.arr = arr;
+            //         this.compare = compare || function (a, b) { return a - b }
+            //     }
+            //     getData() {
+            //         //取出最小的
+            //         if (this.size()) {
+            //             let minValue = this.arr[0], minIndex = 0
+            //             for (let i = 1; i < this.arr.length; i++) {
+            //                 if (this.compare(this.arr[i], minValue) < 0) {
+            //                     minValue = this.arr[i]
+            //                     minIndex = i;
+            //                 }
+            //             }
+            //             this.arr[minIndex] = this.arr[this.size() - 1]
+            //             this.arr.pop()
+            //             return minValue
+            //         }
+
+            //     }
+            //     setData(val) {
+            //         this.arr.push(val)
+            //     }
+            //     size() {
+            //         return this.arr.length;
+            //     }
+            // }
+
+            class Heap {
+                constructor(data = [], compare = (a, b) => a - b) {
+                    //索引0 不存入数据
+                    this.arr = [null];
+                    //遍历依次加入堆
+                    for (let i = 0; i < data.length; i++) {
+                        this.push(data[i])
                     }
-                    this.arr[minIndex] = this.arr[this.size() - 1]
+                    this.compare = compare
+                }
+                push(val) {
+                    this.arr.push(val)
+                    let i = this.arr.length - 1
+                    let p = Math.floor(i / 2)
+                    // i 是 1的话就不用比较了。堆顶元素
+                    // 父节点大的话就交换
+                    // console.log(this.arr[i], this.arr[p])
+                    while (p > 0 && this.compare(this.arr[i], this.arr[p]) < 0) {
+                        //交换
+                        let tmp = this.arr[i]
+                        this.arr[i] = this.arr[p]
+                        this.arr[p] = tmp;
+                        i = p;
+                        p = Math.floor(i / 2)
+                    }
+                }
+                // 取出返回堆顶元素
+                delete() {
+                    // let len = this.arr.length;
+                    //长度为1代表堆空了
+                    // if (len === 1) {
+                    //     return null;
+                    // }
+                    if (!this.size()) {
+                        return null
+                    }
+                    let top = this.arr[1]
+                    //最后一个元素放入堆顶
+                    this.arr[1] = this.arr[this.size()]
+                    //移除最后一位
                     this.arr.pop()
-                    return minValue
-                }
-                
-            }
-            setData(val) {
-                this.arr.push(val)
-            }
-            size() {
-                return this.arr.length;
-            }
-        }
-
-
-
-        async function getPath(map, start, end) {
-            container.children[start[0] * 50 + start[1]].style.backgroundColor = 'green'
-            container.children[end[0] * 50 + end[1]].style.backgroundColor = 'yellow'
-            // return 
-            let distance = (point) => (point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2
-            // let pointDis = (point1, point2) => (point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2
-            let queue = new Sorter([start], (a,b) => distance(a) - distance(b))
-            let table = Object.create(map)
-           const insert = async (x, y, prev) => {
-                if(x < 0 || x >= 50 || y < 0 || y >= 50) {
-                    return
-                }
-                let current = table[x*50 + y];
-                // console.log(path1, path2)
-                if(current === 1) {
-                    return 
-                }
-                // console.log(current)
-                if(current) {
-                    let path1 = Math.abs(x + y - (current[0] + current[1]))
-                    let path2 = Math.abs(x + y - (prev[0] + prev[1]))
-                    console.log(path1, path2)
-                    if(path1 <= path2) {
-                        console.log(path1, path2)
-                        return;
+                    //调整位置
+                    let i = 1
+                    //循环结束的条件是什么
+                    while (true) {
+                        let min = i;
+                        console.log(i)
+                        if (i * 2 <= this.size() && this.compare(this.arr[i * 2], this.arr[i]) < 0) {
+                            min = min * 2
+                        }
+                        if (i * 2 + 1 <= this.size() && this.compare(this.arr[i * 2 + 1], this.arr[min]) < 0) {
+                            min = i * 2 + 1;
+                        }
+                        //循环终止条件就是比较之后 min 还是原位置
+                        if (min === i) {
+                            break
+                        }
+                        //交换
+                        let tmp = this.arr[min]
+                        this.arr[min] = this.arr[i]
+                        this.arr[i] = tmp;
+                        i = min;
                     }
-                   
+                    return top;
                 }
-                // if(table[x*50 + y]) {
-                //     return
-                // }
-                //每个节点记录前一个结点
-                await sleep(100)
-                table[x * 50 + y] = prev
-                container.children[x * 50 + y].style.backgroundColor = 'lightgreen'
-                // container.children[x * 50 + y].innerHTML = prev
-                // await sleep(4000)
-                queue.setData([x, y])
+                size() {
+                    return this.arr.length - 1
+                }
             }
 
-            while(queue.size()) {
-                let [x, y] = queue.getData()
-                //找到了
-                if(x === end[0] && y === end[1]) {
-                    container.children[x * 50 + y].style.backgroundColor = 'red'
-                    let result = []
-                    while(x !== start[0] || y !== start[1]) {
-                        let s1 = map[x * 50 + y];
-                        let s2 = table[x * 50 + y]
-                        
-                        result.push(s1)
-                        await sleep(50)
-                        x = s2[0]
-                        y = s2[1]
-                        // console.log(x,y)
-                        // await sleep(50)
-                        container.children[x * 50 + y].style.backgroundColor = 'blue'
+
+
+            async function getPath(map, start, end) {
+                container.children[start[0] * 50 + start[1]].style.backgroundColor = 'green'
+                container.children[end[0] * 50 + end[1]].style.backgroundColor = 'yellow'
+                let distance = (point) => (point[0] - end[0]) ** 2 + (point[1] - end[1]) ** 2
+                let queue = new Heap([start], (a, b) => distance(a) - distance(b))
+                let table = Object.create(map)
+                const insert = async (x, y, prev) => {
+                    if (x < 0 || x >= 50 || y < 0 || y >= 50) {
+                        return
                     }
-                    // console.log(result)
-                    return result
+                    // let current = table[x*50 + y];
+
+                    if (table[x * 50 + y]) {
+                        return
+                    }
+                    //每个节点记录前一个结点
+                    await sleep(100)
+                    table[x * 50 + y] = prev
+                    container.children[x * 50 + y].style.backgroundColor = 'lightgreen'
+                    queue.push([x, y])
                 }
-                await insert(x, y + 1, [x, y])
-                await insert(x + 1, y, [x, y])
-                await insert(x - 1, y, [x, y])
-                
-                await insert(x, y - 1, [x, y])
-                
-                await insert(x + 1, y + 1, [x, y])
-                await insert(x + 1, y - 1, [x, y])
-                await insert(x - 1, y + 1, [x, y])
-                await insert(x - 1, y - 1, [x, y])
-                
+                while (queue.size()) {
+                    let [x, y] = queue.delete()
+                    //找到了
+                    if (x === end[0] && y === end[1]) {
+                        container.children[x * 50 + y].style.backgroundColor = 'red'
+                        let result = []
+                        while (x !== start[0] || y !== start[1]) {
+                            let s1 = map[x * 50 + y];
+                            let s2 = table[x * 50 + y]
+
+                            result.push(s1)
+                            await sleep(50)
+                            x = s2[0]
+                            y = s2[1]
+                            container.children[x * 50 + y].style.backgroundColor = 'blue'
+                        }
+                        return result
+                    }
+                    await insert(x, y + 1, [x, y])
+                    await insert(x + 1, y, [x, y])
+                    await insert(x - 1, y, [x, y])
+
+                    await insert(x, y - 1, [x, y])
+
+                    await insert(x + 1, y + 1, [x, y])
+                    await insert(x + 1, y - 1, [x, y])
+                    await insert(x - 1, y + 1, [x, y])
+                    await insert(x - 1, y - 1, [x, y])
+
+                }
+
+                return null;
             }
+        </script>
 
-            return null;
-        }
-    </script>
-
-</body>
+    </body>
 
 </html>
