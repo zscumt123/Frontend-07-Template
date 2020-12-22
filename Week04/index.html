@@ -11,27 +11,70 @@
 
     <script>
       let $ = Symbol('$')
-      let obj = {
-
-      }
-      let str = 'abcd'
-      let insert = (str) => {
-        let node = obj;
-        for (let c of str) {
-          if (!node[c]) {
-            node[c] = Object.create(null)
+      class Trie {
+        constructor() {
+         this.root = Object.create(null) 
+        }
+        //插入字符串
+        insert(val) {
+          let node = this.root
+          for(let char of val) {
+            //不存在新建
+            if(!node[char]) {
+              node[char] = Object.create(null)
+            }
+            node = node[char]
           }
-          node = node[c]
+          //终止
+          if(!node[$]) {
+            node[$] = 0
+          }
+          node[$]++
         }
-        if (!($ in node)) {
-          node[$] = 0
+        //出现次数最多的 其实就是找$值最大的
+        most() {
+          let max = 0;
+          let maxStr = ''
+          const visit = (tree, word) => {
+            if(tree[$] && tree[$] > max) {
+              max = tree[$]
+              maxStr = word;
+            }
+            for(let char in tree) {
+              visit(tree[char], word + char)
+            }
+          }
+          visit(this.root, '')
+          return {
+            max,
+            maxStr
+          }
         }
-        node[$]++
+        //查找一个字符串是否存在
+        find(val) {
+          if(!val) {
+            return false
+          }
+          let node = this.root
+          for(let char of val) {
+            if(!node[char]) {
+              return false
+            }
+            node = node[char]
+          }
+          //判断是完全匹配还是前缀
+          if(node[$]) {
+            return true
+          }
+          return false
+        }
       }
-
-      insert(str)
-      insert('haha')
-      insert('aabc')
+      let tree = new Trie()
+      tree.insert('abcd')
+      tree.insert('bcde')
+      tree.insert('abcd')
+      console.log(tree.most())
+      console.log(tree.find('abcd'))
     </script>
 
   </body>
