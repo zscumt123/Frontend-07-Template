@@ -15,7 +15,7 @@
             //i是后缀
             for(let i = 1; i < partten.length; i++) {
                 while(j > 0 && partten[i] !== partten[j]) {
-                    j = next[j]
+                    j = next[j - 1]
                 }
                 if(partten[j] === partten[i]) {
                     j++;
@@ -36,7 +36,7 @@
             let j = 0;
             for(let i = 0; i < text.length;i++) {
                 while(j > 0 && partten[j] !== text[i]) {
-                    j = next[j]
+                    j = next[j - 1]
                 }
                 if(text[i] === partten[j]) {
                     j++;
@@ -47,7 +47,9 @@
             }
             return false
         }
-
+        //  0  1  2  3  4  5  6
+        //  a  b  c  a  b  c  a
+        //  0  0  0  1  2  3  
         console.log(kmp('aaaaa', 'bba'))
     </script>
     
