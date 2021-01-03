@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+      #color {
+        width: 100px;
+        height: 100px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <input id="r" type="range" min=0 max=255 />
+    <input id="g" type="range" min=0 max=255 />
+    <input id="b" type="range" min=0 max=255 />
+    <div id="color"></div>
+
+    <script>
+      let callbacks = new Map()
+      let reactivities = new Map()
+      let usedreActivities = []
+      let obj = {
+        r: 1,
+        g: 1,
+        b: 1
+      }
+      let pro = reactive(obj)
+
+      effect(() => {
+        document.getElementById('r').value = pro.r
+      })
+      effect(() => {
+        document.getElementById('g').value = pro.g
+      })
+      effect(() => {
+        document.getElementById('b').value = pro.b
+      })
+      effect(() => {
+        document.getElementById('color').style.backgroundColor = `rgb(${pro.r},${pro.g},${pro.b})`
+      })
+
+      document.getElementById('r').addEventListener('input', e => pro.r = e.target.value)
+      document.getElementById('g').addEventListener('input', e => pro.g = e.target.value)
+      document.getElementById('b').addEventListener('input', e => pro.b = e.target.value)
+
+      function effect(cb) {
+        usedActivities = []
+        cb()
+        for (let item of usedreActivities) {
+          if (!callbacks.has(item[0])) {
+            callbacks.set(item[0], new Map())
+          }
+          if (!callbacks.get(item[0]).has(item[1])) {
+            callbacks.get(item[0]).set(item[1], [])
+          }
+          callbacks.get(item[0]).get(item[1]).push(cb)
+        }
+      }
+
+      function reactive(obj) {
+        if (reactivities.has(obj)) {
+          return reactivities.get(obj)
+        }
+        let pro = new Proxy(obj, {
+          get(obj, prop) {
+            usedreActivities.push([obj, prop])
+            if (typeof obj[prop] === 'object') {
+              return reactive(obj[prop])
+            }
+            return obj[prop]
+          },
+          set(obj, prop, val) {
+            obj[prop] = val
+            if (callbacks.get(obj) && callbacks.get(obj).get(prop)) {
+              let cbs = callbacks.get(obj).get(prop)
+              for (let cb of cbs) {
+                cb()
+              }
+            }
+            return obj[prop]
+          }
+        })
+        reactivities.set(obj, pro)
+        return pro
+      }
+    </script>
+
+  </body>
+
+</html>
